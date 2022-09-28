@@ -36,9 +36,7 @@ public class TaskServiceImpl {
         lesson.addTasks(task);
         task.setLessons(lesson);
         Task task1 = taskRepository.save(task);
-        return new TaskResponse(task1.getTaskId(), task1.getTaskName(),
-                                task1.getTaskText(), task1.getDeadline(),
-                                task.getLessons().getLessonId());
+        return mapToResponse(task1);
     }
 
     public TaskResponseView getTasksPagination(String text, int page, int size) {
@@ -56,9 +54,7 @@ public class TaskServiceImpl {
     public List<TaskResponse> getTasks(List<Task> tasks) {
         List<TaskResponse> responses = new ArrayList<>();
         for (Task task : tasks) {
-            responses.add(new TaskResponse(task.getTaskId(), task.getTaskName(),
-                                           task.getTaskText(), task.getDeadline(),
-                                           task.getLessons().getLessonId()));
+            responses.add(mapToResponse(task));
         }
         return responses;
     }
@@ -66,9 +62,7 @@ public class TaskServiceImpl {
     public TaskResponse getById(Long id) {
         Task task = taskRepository.findById(id).orElseThrow(
                 () -> new NotFoundException((String.format("Task with id - %s not found", id))));
-        return new TaskResponse(task.getTaskId(), task.getTaskName(),
-                                task.getTaskText(), task.getDeadline(),
-                                task.getLessons().getLessonId());
+        return mapToResponse(task);
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
@@ -82,9 +76,7 @@ public class TaskServiceImpl {
         lesson.addTasks(task);
         task.setLessons(lesson);
         taskRepository.save(task);
-        return new TaskResponse(task.getTaskId(), task.getTaskName(),
-                                task.getTaskText(), task.getDeadline(),
-                                task.getLessons().getLessonId());
+        return mapToResponse(task);
     }
 
     public TaskResponse deleteById(Long id) {
@@ -92,15 +84,18 @@ public class TaskServiceImpl {
                 () -> new NotFoundException((String.format("Task with id - %s not found", id))));
         task.setLessons(null);
         taskRepository.delete(task);
-        Task task1 = new Task();
-        task1.setTaskName(task.getTaskName());
-        task1.setTaskText(task.getTaskText());
-        task1.setDeadline(task.getDeadline());
         return new TaskResponse(task.getTaskId(), task.getTaskName(),
                 task.getTaskText(), task.getDeadline(), null);
     }
 
     public List<Task> findAllTasks() {
         return taskRepository.findAll();
+    }
+
+    private TaskResponse mapToResponse(Task task) {
+        return new TaskResponse(
+                task.getTaskId(), task.getTaskName(),
+                task.getTaskText(), task.getDeadline(),
+                task.getLessons().getLessonId());
     }
 }

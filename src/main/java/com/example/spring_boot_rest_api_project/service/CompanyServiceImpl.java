@@ -32,7 +32,7 @@ public class CompanyServiceImpl {
         company.setCompanyName(request.getCompanyName());
         company.setLocatedCountry(request.getLocatedCountry());
         Company company1 = companyRepository.save(company);
-        return new CompanyResponse(company1.getCompanyId(), company1.getCompanyName(), company1.getLocatedCountry());
+        return mapToResponse(company1);
     }
 
     public CompanyResponseView getAllCompaniesPagination(String text, int page, int size) {
@@ -50,8 +50,7 @@ public class CompanyServiceImpl {
     public List<CompanyResponse> getCompanies(List<Company> companies) {
         List<CompanyResponse> responses = new ArrayList<>();
         for (Company company : companies) {
-            responses.add(new CompanyResponse(company.getCompanyId(),
-                    company.getCompanyName(), company.getLocatedCountry()));
+            responses.add(mapToResponse(company));
         }
         return responses;
     }
@@ -59,7 +58,7 @@ public class CompanyServiceImpl {
     public CompanyResponse getById(Long id) {
         Company company = companyRepository.findById(id).orElseThrow(
                 () -> new NotFoundException((String.format("Company with id - %s not found", id))));
-        return new CompanyResponse(company.getCompanyId(), company.getCompanyName(), company.getLocatedCountry());
+        return mapToResponse(company);
     }
 
     public CompanyResponse update(Long id, CompanyRequest request) {
@@ -68,18 +67,25 @@ public class CompanyServiceImpl {
         company.setCompanyName(request.getCompanyName());
         company.setLocatedCountry(request.getLocatedCountry());
         companyRepository.save(company);
-        return new CompanyResponse(company.getCompanyId(), company.getCompanyName(), company.getLocatedCountry());
+        return mapToResponse(company);
     }
 
     public CompanyResponse deleteById(Long id) {
         Company company = companyRepository.findById(id).orElseThrow(
                 () -> new NotFoundException((String.format("Company with id - %s not found", id))));
         companyRepository.delete(company);
-        return new CompanyResponse(company.getCompanyId(), company.getCompanyName(), company.getLocatedCountry());
+        return mapToResponse(company);
     }
 
     public List<Company> findAllCompanies() {
         return companyRepository.findAll();
+    }
+
+    private CompanyResponse mapToResponse(Company company) {
+        return new CompanyResponse(
+                company.getCompanyId(),
+                company.getCompanyName(),
+                company.getLocatedCountry());
     }
 
 }

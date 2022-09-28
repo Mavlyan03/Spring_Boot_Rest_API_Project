@@ -39,9 +39,7 @@ public class CourseServiceImpl {
         company.addCourse(course);
         course.setCompany(company);
         Course course1 = courseRepository.save(course);
-        return new CourseResponse(course1.getCourseId(), course1.getCourseName(),
-                course1.getDuration(), course1.getImage(), course1.getDescription(),
-                course1.getCompany().getCompanyId());
+        return mapToResponse(course1);
     }
 
     public CourseResponseView getAllCoursesPagination(String text, int page, int size) {
@@ -59,18 +57,14 @@ public class CourseServiceImpl {
     public List<CourseResponse> getCourses(List<Course> courses) {
         List<CourseResponse> responses = new ArrayList<>();
         for (Course course : courses) {
-            responses.add(new CourseResponse(course.getCourseId(), course.getCourseName(),
-                    course.getDuration(), course.getImage(), course.getDescription(),
-                    course.getCompany().getCompanyId()));
+            responses.add(mapToResponse(course));
         }
         return responses;
     }
 
     public CourseResponse getById(Long id) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NotFoundException((String.format("Course with id - %s not found", id))));
-        return new CourseResponse(course.getCourseId(), course.getCourseName(),
-                course.getDuration(), course.getImage(), course.getDescription(),
-                course.getCompany().getCompanyId());
+        return mapToResponse(course);
     }
 
     public CourseResponse updateCourse(Long id, CourseRequest request) {
@@ -85,9 +79,7 @@ public class CourseServiceImpl {
         company.addCourse(course);
         course.setCompany(company);
         courseRepository.save(course);
-        return new CourseResponse(course.getCourseId(), course.getCourseName(),
-                course.getDuration(), course.getImage(), course.getDescription(),
-                course.getCompany().getCompanyId());
+        return mapToResponse(course);
     }
 
     public CourseResponse deleteById(Long id) {
@@ -98,19 +90,19 @@ public class CourseServiceImpl {
             instructor.setCourses(null);
         }
         courseRepository.delete(course);
-        Course course1 = new Course();
-        course1.setCourseId(course.getCourseId());
-        course1.setCourseName(course.getCourseName());
-        course1.setDescription(course.getDescription());
-        course1.setDuration(course.getDuration());
-        course1.setImage(course.getImage());
-        course1.setDateOfStart(LocalDate.now());
-        return new CourseResponse(course1.getCourseId(), course1.getCourseName(),
-                course1.getDuration(), course1.getImage(), course1.getDescription(), null);
+        return new CourseResponse(course.getCourseId(), course.getCourseName(),
+                course.getDuration(), course.getImage(), course.getDescription(), null);
     }
 
     public List<Course> findAllCourses() {
         return courseRepository.findAll();
+    }
+
+    private CourseResponse mapToResponse(Course course) {
+        return new CourseResponse(
+                course.getCourseId(), course.getCourseName(),
+                course.getDuration(), course.getImage(),
+                course.getDescription(), course.getCompany().getCompanyId());
     }
 
 }

@@ -34,14 +34,13 @@ public class VideoServiceImpl {
         lesson.setVideo(video);
         video.setLesson(lesson);
         Video video1 = videoRepository.save(video);
-        return new VideoResponse(video1.getVideoId(), video1.getVideoName(),
-                video1.getLink(), video1.getLesson().getLessonId());
+        return mapToResponse(video1);
     }
 
     public VideoResponseView getVideosPagination(String text, int page, int size) {
         VideoResponseView view = new VideoResponseView();
         Pageable pageable = PageRequest.of(page - 1, size);
-        view.setVideoResponses(getVideos(search(text,pageable)));
+        view.setVideoResponses(getVideos(search(text, pageable)));
         return view;
     }
 
@@ -53,8 +52,7 @@ public class VideoServiceImpl {
     public List<VideoResponse> getVideos(List<Video> videos) {
         List<VideoResponse> responses = new ArrayList<>();
         for (Video video : videos) {
-            responses.add(new VideoResponse(video.getVideoId(), video.getVideoName(),
-                    video.getLink(), video.getLesson().getLessonId()));
+            responses.add(mapToResponse(video));
         }
         return responses;
     }
@@ -62,8 +60,7 @@ public class VideoServiceImpl {
     public VideoResponse getById(Long id) {
         Video video = videoRepository.findById(id).orElseThrow(
                 () -> new NotFoundException((String.format("Video with id - %s not found", id))));
-        return new VideoResponse(video.getVideoId(), video.getVideoName(),
-                video.getLink(), video.getLesson().getLessonId());
+        return mapToResponse(video);
     }
 
     public VideoResponse updateVideo(Long id, VideoRequest request) {
@@ -76,8 +73,7 @@ public class VideoServiceImpl {
         lesson.setVideo(video);
         video.setLesson(lesson);
         videoRepository.save(video);
-        return new VideoResponse(video.getVideoId(), video.getVideoName(),
-                video.getLink(), video.getLesson().getLessonId());
+        return mapToResponse(video);
     }
 
     public VideoResponse deleteById(Long id) {
@@ -85,14 +81,19 @@ public class VideoServiceImpl {
                 () -> new NotFoundException((String.format("Video with id - %s not found", id))));
         video.setLesson(null);
         videoRepository.delete(video);
-        Video video1 = new Video();
-        video1.setVideoName(video.getVideoName());
-        video1.setLink(video.getLink());
         return new VideoResponse(video.getVideoId(), video.getVideoName(),
-                                 video.getLink(), null);
+                video.getLink(), null);
     }
 
     public List<Video> findAllVideos() {
         return videoRepository.findAll();
+    }
+
+    private VideoResponse mapToResponse(Video video) {
+        return new VideoResponse(
+                video.getVideoId(),
+                video.getVideoName(),
+                video.getLink(),
+                video.getLesson().getLessonId());
     }
 }

@@ -34,15 +34,16 @@ public class LessonServiceImpl {
         lesson.setCourses(course);
         lesson.setLessonName(request.getLessonName());
         Lesson lesson1 = lessonRepository.save(lesson);
-        return new LessonResponse(lesson1.getLessonId(), lesson1.getLessonName(), lesson1.getCourses().getCourseId());
+        return mapToResponse(lesson1);
     }
 
     public LessonResponseView getLessonsPagination(String text, int page, int size) {
         LessonResponseView view = new LessonResponseView();
         Pageable pageable = PageRequest.of(page - 1, size);
-        view.setLessonResponses(getLessons(search(text,pageable)));
+        view.setLessonResponses(getLessons(search(text, pageable)));
         return view;
     }
+
     private List<Lesson> search(String name, Pageable pageable) {
         String text = name == null ? "" : name;
         return lessonRepository.searchByLesson(text.toUpperCase(), pageable);
@@ -51,8 +52,7 @@ public class LessonServiceImpl {
     public List<LessonResponse> getLessons(List<Lesson> lessons) {
         List<LessonResponse> responses = new ArrayList<>();
         for (Lesson lesson : lessons) {
-            responses.add(new LessonResponse(lesson.getLessonId(),
-                    lesson.getLessonName(), lesson.getCourses().getCourseId()));
+            responses.add(mapToResponse(lesson));
         }
         return responses;
     }
@@ -60,7 +60,7 @@ public class LessonServiceImpl {
     public LessonResponse getById(Long id) {
         Lesson lesson = lessonRepository.findById(id).orElseThrow(
                 () -> new NotFoundException((String.format("Lesson with id - %s not found", id))));
-        return new LessonResponse(lesson.getLessonId(), lesson.getLessonName(), lesson.getCourses().getCourseId());
+        return mapToResponse(lesson);
     }
 
     public LessonResponse updateLessons(Long id, LessonRequest request) {
@@ -71,19 +71,25 @@ public class LessonServiceImpl {
         course.addLessons(lesson);
         lesson.setCourses(course);
         lessonRepository.save(lesson);
-        return new LessonResponse(lesson.getLessonId(), lesson.getLessonName(), lesson.getCourses().getCourseId());
+        return mapToResponse(lesson);
     }
 
     public LessonResponse deleteById(Long id) {
         Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new NotFoundException((String.format("Lesson with id - %s not found", id))));
         lesson.setVideo(null);
+        lesson.setCourses(null);
         lessonRepository.delete(lesson);
-        Lesson lesson1 = new Lesson();
-        lesson1.setLessonName(lesson.getLessonName());
-        return new LessonResponse(lesson1.getLessonId(), lesson1.getLessonName(), lesson.getCourses().getCourseId());
+        return new LessonResponse(lesson.getLessonId(), lesson.getLessonName(), null);
     }
 
     public List<Lesson> findAllLessons() {
         return lessonRepository.findAll();
+    }
+
+    private LessonResponse mapToResponse(Lesson lesson) {
+        return new LessonResponse(
+                lesson.getLessonId(),
+                lesson.getLessonName(),
+                lesson.getCourses().getCourseId());
     }
 }

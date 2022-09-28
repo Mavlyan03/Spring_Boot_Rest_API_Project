@@ -94,11 +94,7 @@ public class InstructorServiceImpl {
     public List<InstructorResponse> getInstructors(List<Instructor> instructors) {
         List<InstructorResponse> responses = new ArrayList<>();
         for (Instructor instructor : instructors) {
-            responses.add(new InstructorResponse(instructor.getInstructorId(), instructor.getFirstName(),
-                    instructor.getLastName(), instructor.getPhoneNumber(), instructor.getEmail(),
-                    instructor.getSpecialization(), instructor.getAuthInfo().getPassword(),
-                    instructor.getCompany().getCompanyId(), instructor.getAuthInfo().getIsActive(),
-                    instructor.getAuthInfo().getCreated()));
+            responses.add(mapToResponse(instructor));
         }
         return responses;
     }
@@ -123,11 +119,7 @@ public class InstructorServiceImpl {
         company.addInstructor(instructor);
         instructor.setCompany(company);
         instructorRepository.save(instructor);
-        return new InstructorResponse(instructor.getInstructorId(), instructor.getFirstName(),
-                instructor.getLastName(), instructor.getPhoneNumber(), instructor.getEmail(),
-                instructor.getSpecialization(), instructor.getAuthInfo().getPassword(),
-                instructor.getCompany().getCompanyId(), instructor.getAuthInfo().getIsActive(),
-                instructor.getAuthInfo().getCreated());
+        return mapToResponse(instructor);
     }
 
     public InstructorResponse deleteById(Long id) {
@@ -144,17 +136,10 @@ public class InstructorServiceImpl {
             }
         });
         instructorRepository.delete(instructor);
-        Instructor instructor1 = new Instructor();
-        instructor1.setFirstName(instructor.getFirstName());
-        instructor1.setLastName(instructor.getLastName());
-        instructor1.setEmail(instructor.getEmail());
-        instructor1.setPhoneNumber(instructor.getPhoneNumber());
-        instructor1.setSpecialization(instructor.getSpecialization());
-        instructor1.setCompany(instructor.getCompany());
-        return new InstructorResponse(instructor1.getInstructorId(), instructor1.getFirstName(),
-                instructor1.getLastName(), instructor1.getPhoneNumber(), instructor1.getEmail(),
-                instructor1.getSpecialization(), null, null,
-                instructor1.getAuthInfo().getIsActive(), instructor1.getAuthInfo().getCreated());
+        return new InstructorResponse(instructor.getInstructorId(), instructor.getFirstName(),
+                instructor.getLastName(), instructor.getPhoneNumber(), instructor.getEmail(),
+                instructor.getSpecialization(), null, null,
+                instructor.getAuthInfo().getIsActive(), instructor.getAuthInfo().getCreated());
     }
 
     public List<Instructor> findAllInstructors() {
@@ -170,5 +155,14 @@ public class InstructorServiceImpl {
         course.addInstructors(instructor);
         instructorRepository.save(instructor);
         return "Assign instructor to course was successfully!";
+    }
+
+    private InstructorResponse mapToResponse(Instructor instructor) {
+        return new InstructorResponse(
+                instructor.getInstructorId(), instructor.getFirstName(),
+                instructor.getLastName(), instructor.getPhoneNumber(),
+                instructor.getEmail(), instructor.getSpecialization(),
+                instructor.getSpecialization(), instructor.getCompany().getCompanyId(),
+                instructor.getAuthInfo().getIsActive(), instructor.getAuthInfo().getCreated());
     }
 }

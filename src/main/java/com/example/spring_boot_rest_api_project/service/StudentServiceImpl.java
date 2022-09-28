@@ -94,10 +94,7 @@ public class StudentServiceImpl {
     public List<StudentResponse> getStudents(List<Student> students) {
         List<StudentResponse> responses = new ArrayList<>();
         for (Student student : students) {
-            responses.add(new StudentResponse(student.getStudentId(), student.getFirstName(), student.getLastName(),
-                    student.getPhoneNumber(), student.getEmail(), student.getStudyFormat(),
-                    student.getAuthInfo().getPassword(), student.getCompany().getCompanyId(),
-                    student.getAuthInfo().getIsActive(), student.getAuthInfo().getCreated()));
+            responses.add(mapToResponse(student));
         }
         return responses;
     }
@@ -122,10 +119,7 @@ public class StudentServiceImpl {
         company.addStudent(student);
         student.setCompany(company);
         studentRepository.save(student);
-        return new StudentResponse(student.getStudentId(), student.getFirstName(), student.getLastName(),
-                student.getPhoneNumber(), student.getEmail(), student.getStudyFormat(),
-                student.getAuthInfo().getPassword(), student.getCompany().getCompanyId(),
-                student.getAuthInfo().getIsActive(), student.getAuthInfo().getCreated());
+        return mapToResponse(student);
     }
 
     public StudentResponse block(Long id) {
@@ -135,7 +129,7 @@ public class StudentServiceImpl {
                 .orElseThrow(() -> new NotFoundException("User with id - %s not found"));
         authInfo.setIsActive(false);
         studentRepository.save(student);
-        return convertToResponse(student);
+        return mapToResponse(student);
     }
 
     public StudentResponse deleteById(Long id) {
@@ -153,16 +147,9 @@ public class StudentServiceImpl {
             }
         });
         studentRepository.delete(student);
-        Student student1 = new Student();
-        student1.setFirstName(student.getFirstName());
-        student1.setLastName(student.getLastName());
-        student1.setStudyFormat(student.getStudyFormat());
-        student1.setPhoneNumber(student.getPhoneNumber());
-        student1.setEmail(student.getEmail());
-        student1.setPhoneNumber(student.getPhoneNumber());
-        return new StudentResponse(student1.getStudentId(), student1.getFirstName(), student1.getLastName(),
-                student1.getPhoneNumber(), student1.getEmail(), null, null, null,
-                student1.getAuthInfo().getIsActive(), student1.getAuthInfo().getCreated());
+        return new StudentResponse(student.getStudentId(), student.getFirstName(), student.getLastName(),
+                student.getPhoneNumber(), student.getEmail(), null, null, null,
+                student.getAuthInfo().getIsActive(), student.getAuthInfo().getCreated());
     }
 
     public List<Student> findAllStudents() {
@@ -178,6 +165,14 @@ public class StudentServiceImpl {
         course.addStudents(student);
         studentRepository.save(student);
         return "Assign student to course was successfully!";
+    }
+
+    private StudentResponse mapToResponse(Student student) {
+        return new StudentResponse(
+                student.getStudentId(), student.getFirstName(), student.getLastName(),
+                student.getPhoneNumber(), student.getEmail(), student.getStudyFormat(),
+                student.getAuthInfo().getPassword(), student.getCompany().getCompanyId(),
+                student.getAuthInfo().getIsActive(), student.getAuthInfo().getCreated());
     }
 
 }
